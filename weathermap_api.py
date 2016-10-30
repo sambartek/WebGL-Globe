@@ -2,23 +2,23 @@ import urllib2
 import json
 import requests
 #  Website https://openweathermap.org/current
-#  API KEY:
-#  b128a419a6c86255ac83d910112a3d5a  
 #  API Call:
-#  http://api.openweathermap.org/data/2.5/box/city?bbox=12,32,15,37,10&cluster=yes&APPID=b128a419a6c86255ac83d910112a3d5a
+#  http://api.openweathermap.org/data/2.5/box/city?bbox=12,32,15,37,10&cluster=yes&APPID={api key}
 #  Data range for entire earth:
 #  bbox=,-146,-60,160,55
 
+# builds the api call for data from OpenWeatherMap.org
 def build_api_call():
  	url = 'http://api.openweathermap.org/data/2.5/box/city?bbox=-160,-70,170,70&cluster=yes' 
- 	url+='&APPID=b128a419a6c86255ac83d910112a3d5a'
+ 	url+='&{api key}'
 	return url 
-
+#loads the data from OpenWeatherMap in JSON format
 def call_api(url):
 	response = urllib2.urlopen(url)
 	j = json.load(response)
 	return j
-			
+# displays the JSON information so the data can easily be viewed, allows for easy changes to what data is collected
+# prints the City name, lat, lon, temperature of the city, the rain data and the snow data of the city
 def display_json(json_obj):
 	print "DATA INCOMING!"
 	x = 0
@@ -36,11 +36,12 @@ def display_json(json_obj):
 				print "Rain Volume:", value['3h']
 			elif key == 'snow':
 				print "Snow Fall:", value['3h']
-
+# creates a list in python that follows the same format needed for the WebGL Globe to accept 
+# stats prints a list in the form [lat,lon,temp,lat,lon,temp....]
+# this list is then copied into a JSON file for the globe to read
 def parse_json(json_obj):
 	stats = []
 	for data in json_obj['list']:
-		
 		for key, value in data.iteritems():	
 			if key == 'coord':
 				lon = value['lon']
@@ -48,7 +49,7 @@ def parse_json(json_obj):
 				stats = stats + [lat] + [lon]
 			elif key == 'main':
 				temp = value['temp']
-				temp = temp / 30
+				temp = temp / 30     # makes the temp values less than 1, so globe can view properly
 				if temp < 0:
 					temp = .0156
 				stats = stats + [temp]
@@ -60,4 +61,4 @@ print "URL:",url
 json_obj = call_api(url)
 display_json(json_obj)
 print "##############################"
-parse_json(json_obj)
+parse_json(json_obj) # call to get globe data
